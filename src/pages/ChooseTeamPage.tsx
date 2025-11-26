@@ -14,8 +14,15 @@ export default function ChooseTeamPage() {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [loadingTeams, setLoadingTeams] = useState(false);
-    const { user, refreshMembership } = useAuth();
+    const { user, teamMembership, refreshMembership } = useAuth();
     const navigate = useNavigate();
+
+    // Redirect to dashboard if user already has an approved team membership
+    useEffect(() => {
+        if (teamMembership && teamMembership.status === 'approved') {
+            navigate('/', { replace: true });
+        }
+    }, [teamMembership, navigate]);
 
     // Load teams when switching to join mode
     useEffect(() => {

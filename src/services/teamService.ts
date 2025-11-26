@@ -16,6 +16,18 @@ export interface TeamMemberWithProfile extends TeamMember {
  * Create a new team and set the creator as admin
  */
 export async function createTeamAndSetAdmin(teamName: string, userId: string): Promise<{ team: Team; membership: TeamMember }> {
+    // Check if user already has a team membership
+    const existingMembership = await getUserTeamMembership(userId);
+    if (existingMembership) {
+        throw new Error('You already have a team membership. Each user can only belong to one team.');
+    }
+
+    // Also check for pending memberships
+    const pendingMembership = await getUserPendingMembership(userId);
+    if (pendingMembership) {
+        throw new Error('You already have a pending team membership request. Please wait for approval or cancel it first.');
+    }
+
     // Start a transaction by creating the team first
     const teamData: TeamInsert = {
         name: teamName,
@@ -59,6 +71,18 @@ export async function createTeamAndSetAdmin(teamName: string, userId: string): P
  * Request to join an existing team
  */
 export async function requestJoinTeam(teamId: string, userId: string): Promise<TeamMember> {
+    // Check if user already has an approved team membership
+    const existingMembership = await getUserTeamMembership(userId);
+    if (existingMembership) {
+        throw new Error('You already have a team membership. Each user can only belong to one team.');
+    }
+
+    // Check if user already has a pending request
+    const pendingMembership = await getUserPendingMembership(userId);
+    if (pendingMembership) {
+        throw new Error('You already have a pending team membership request. Please wait for approval or cancel it first.');
+    }
+
     const membershipData: TeamMemberInsert = {
         team_id: teamId,
         user_id: userId,
