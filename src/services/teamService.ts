@@ -204,6 +204,48 @@ export async function getPendingRequests(teamId: string): Promise<TeamMemberWith
  * Approve a pending membership request
  */
 export async function approveMember(membershipId: string): Promise<TeamMember> {
+    console.log('[teamService] Approving member with ID:', membershipId);
+
+    // First, verify the membership exists and is pending
+    const { data: existingMembership, error: fetchError } = await ((supabase as any)
+        .from('team_members')
+        .select('*')
+        .eq('id', membershipId)
+        .single());
+
+    if (fetchError) {
+        console.error('[teamService] Error fetching membership:', fetchError);
+        throw new Error(`Failed to fetch membership: ${fetchError.message}`);
+    }
+
+    if (!existingMembership) {
+        throw new Error('Membership not found');
+    }
+
+    if (existingMembership.status !== 'pending') {
+        throw new Error(`Membership is not pending (current status: ${existingMembership.status})`);
+    }
+
+    console.log('[teamService] Existing membership:', existingMembership);
+
+    // Check if user already has an approved membership for a different team
+    const { data: otherMemberships, error: checkError } = await supabase
+        .from('team_members')
+        .select('*')
+        .eq('user_id', existingMembership.user_id)
+        .eq('status', 'approved')
+        .neq('id', membershipId);
+
+    if (checkError) {
+        console.error('[teamService] Error checking other memberships:', checkError);
+    }
+
+    if (otherMemberships && otherMemberships.length > 0) {
+        console.warn('[teamService] User already has approved membership(s):', otherMemberships);
+        throw new Error('User already has an approved team membership. Each user can only belong to one team.');
+    }
+
+    // Now attempt to approve
     const { data, error } = await ((supabase as any)
         .from('team_members')
         .update({ status: 'approved' })
@@ -213,11 +255,20 @@ export async function approveMember(membershipId: string): Promise<TeamMember> {
         .single());
 
     if (error) {
+        console.error('[teamService] Error approving member:', {
+            code: error.code,
+            message: error.message,
+            details: error.details,
+            hint: error.hint,
+            fullError: error
+        });
         throw error;
     }
 
+    console.log('[teamService] Member approved successfully:', data);
     return data;
 }
+
 
 /**
  * Reject a pending membership request

@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../lib/supabaseClient';
+import { useTeamId } from './useTeamId';
 
 interface PlayerComparisonStats {
     playerName: string;
@@ -49,21 +50,47 @@ interface PlayerComparison {
 }
 
 export function usePlayerComparison(player1Id?: number, player2Id?: number) {
+    const teamId = useTeamId();
+
     return useQuery<PlayerComparison>({
-        queryKey: ['playerComparison', player1Id, player2Id],
+        queryKey: ['playerComparison', player1Id, player2Id, teamId],
         queryFn: async () => {
             if (!player1Id || !player2Id) {
                 throw new Error('Both player IDs are required');
             }
+            if (!teamId) {
+                throw new Error('No team membership found');
+            }
+
+            // Verify both players belong to this team
+            const { data: player1Data, error: player1Error } = await supabase
+                .from('players')
+                .select('team_id')
+                .eq('player_id', player1Id)
+                .single() as { data: { team_id: string } | null; error: any };
+
+            const { data: player2Data, error: player2Error } = await supabase
+                .from('players')
+                .select('team_id')
+                .eq('player_id', player2Id)
+                .single() as { data: { team_id: string } | null; error: any };
+
+            if (player1Error || player2Error || !player1Data || !player2Data) {
+                throw new Error('Failed to verify player ownership');
+            }
+
+            if (player1Data.team_id !== teamId || player2Data.team_id !== teamId) {
+                throw new Error('One or both players do not belong to your team');
+            }
 
             // Fetch player 1 stats
-            const player1Stats = await fetchPlayerStats(player1Id);
+            const player1Stats = await fetchPlayerStats(player1Id, teamId);
 
             // Fetch player 2 stats
-            const player2Stats = await fetchPlayerStats(player2Id);
+            const player2Stats = await fetchPlayerStats(player2Id, teamId);
 
             // Fetch head-to-head record
-            const headToHead = await fetchHeadToHead(player1Id, player2Id);
+            const headToHead = await fetchHeadToHead(player1Id, player2Id, teamId);
 
             return {
                 player1: player1Stats,
@@ -71,21 +98,22 @@ export function usePlayerComparison(player1Id?: number, player2Id?: number) {
                 headToHead,
             };
         },
-        enabled: !!player1Id && !!player2Id && player1Id !== player2Id,
+        enabled: !!player1Id && !!player2Id && player1Id !== player2Id && !!teamId,
     });
 }
 
-async function fetchPlayerStats(playerId: number): Promise<PlayerComparisonStats> {
+async function fetchPlayerStats(playerId: number, teamId: string): Promise<PlayerComparisonStats> {
     // Get player name
     const { data: playerData } = await supabase
         .from('players')
         .select('full_name')
         .eq('player_id', playerId)
+        .eq('team_id', teamId)
         .single();
 
     const player = playerData as any;
 
-    // Get all matches for this player
+    // Get all matches for this player (filtered by team)
     const { data: matchesData } = await supabase
         .from('matches')
         .select(`
@@ -95,7 +123,8 @@ async function fetchPlayerStats(playerId: number): Promise<PlayerComparisonStats
                 side
             )
         `)
-        .eq('match_players.player_id', playerId);
+        .eq('match_players.player_id', playerId)
+        .eq('team_id', teamId);
 
     const matches = matchesData as any[];
 
@@ -169,8 +198,8 @@ async function fetchPlayerStats(playerId: number): Promise<PlayerComparisonStats
     };
 }
 
-async function fetchHeadToHead(player1Id: number, player2Id: number): Promise<HeadToHeadRecord> {
-    // Find matches where both players participated
+async function fetchHeadToHead(player1Id: number, player2Id: number, teamId: string): Promise<HeadToHeadRecord> {
+    // Find matches where both players participated (filtered by team)
     const { data: player1MatchesData } = await supabase
         .from('match_players')
         .select('match_id')
@@ -199,7 +228,7 @@ async function fetchHeadToHead(player1Id: number, player2Id: number): Promise<He
         };
     }
 
-    // Fetch match details
+    // Fetch match details (filtered by team)
     const { data: matchesData } = await supabase
         .from('matches')
         .select(`
@@ -211,6 +240,7 @@ async function fetchHeadToHead(player1Id: number, player2Id: number): Promise<He
             match_players(player_id, side)
         `)
         .in('match_id', commonMatchIds)
+        .eq('team_id', teamId)
         .order('match_date', { ascending: false });
 
     const matches = matchesData as any[];

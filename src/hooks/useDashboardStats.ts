@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../lib/supabaseClient';
 import { MatchWithPlayer } from '../types/extended';
+import { useTeamId } from './useTeamId';
 
 interface DashboardStats {
     totalPlayers: number;
@@ -34,17 +35,22 @@ interface DashboardStats {
 }
 
 export function useDashboardStats() {
+    const teamId = useTeamId();
+
     return useQuery<DashboardStats>({
-        queryKey: ['dashboardStats'],
+        queryKey: ['dashboardStats', teamId],
         queryFn: async () => {
-            // Fetch all players (for total count)
+            if (!teamId) throw new Error('No team membership found');
+
+            // Fetch all players for this team only
             const { data: players, error: playersError } = await supabase
                 .from('players')
-                .select('player_id, full_name, avatar_url');
+                .select('player_id, full_name, avatar_url')
+                .eq('team_id', teamId);
 
             if (playersError) throw playersError;
 
-            // Fetch all matches with player info
+            // Fetch all matches for this team only
             const { data: matches, error: matchesError } = await supabase
                 .from('matches')
                 .select(`
@@ -57,6 +63,7 @@ export function useDashboardStats() {
                         )
                     )
                 `)
+                .eq('team_id', teamId)
                 .order('match_date', { ascending: false });
 
             if (matchesError) throw matchesError;
@@ -174,5 +181,6 @@ export function useDashboardStats() {
 
             return stats;
         },
+        enabled: !!teamId,
     });
 }

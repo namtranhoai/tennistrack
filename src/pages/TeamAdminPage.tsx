@@ -32,12 +32,17 @@ export default function TeamAdminPage() {
 
     const handleApprove = async (membershipId: string) => {
         try {
+            setError(''); // Clear any previous errors
             await teamService.approveMember(membershipId);
             // Reload the list
             await loadPendingRequests();
-        } catch (err) {
+        } catch (err: any) {
             console.error('Error approving member:', err);
-            setError('Failed to approve member');
+            const errorMessage = err?.message || 'Failed to approve member';
+            const errorCode = err?.code ? ` (Code: ${err.code})` : '';
+            const errorDetails = err?.details ? `\nDetails: ${err.details}` : '';
+            const errorHint = err?.hint ? `\nHint: ${err.hint}` : '';
+            setError(`${errorMessage}${errorCode}${errorDetails}${errorHint}`);
         }
     };
 
@@ -81,7 +86,7 @@ export default function TeamAdminPage() {
             </div>
 
             {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 whitespace-pre-wrap">
                     {error}
                 </div>
             )}

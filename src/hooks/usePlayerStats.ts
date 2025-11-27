@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../lib/supabaseClient';
 import { MatchWithPlayer, SetRow, SetTechStatsRow } from '../types/extended';
+import { useTeamId } from './useTeamId';
 
 export type DateRange = '1month' | '3months' | '6months' | '1year' | 'all';
 
@@ -65,9 +66,27 @@ function getDateRangeFilter(dateRange: DateRange): string | null {
 }
 
 export function usePlayerStats(playerId: number, dateRange: DateRange = '6months') {
+    const teamId = useTeamId();
+
     return useQuery<PlayerStats>({
-        queryKey: ['playerStats', playerId, dateRange],
+        queryKey: ['playerStats', playerId, dateRange, teamId],
         queryFn: async () => {
+            if (!teamId) throw new Error('No team membership found');
+
+
+            // First verify the player belongs to this team
+            const { data: player, error: playerError } = await supabase
+                .from('players')
+                .select('team_id')
+                .eq('player_id', playerId)
+                .single() as { data: { team_id: string } | null; error: any };
+
+            if (playerError || !player) throw playerError || new Error('Player not found');
+            if (player.team_id !== teamId) {
+                throw new Error('Player does not belong to your team');
+            }
+
+
             const startDate = getDateRangeFilter(dateRange);
 
             // Fetch matches with sets and tech stats
@@ -88,6 +107,7 @@ export function usePlayerStats(playerId: number, dateRange: DateRange = '6months
                     )
                 `)
                 .eq('match_players.player_id', playerId)
+                .eq('team_id', teamId)
                 .order('match_date', { ascending: false });
 
             if (startDate) {
@@ -284,6 +304,6 @@ export function usePlayerStats(playerId: number, dateRange: DateRange = '6months
 
             return stats;
         },
-        enabled: !!playerId,
+        enabled: !!playerId && !!teamId,
     });
 }

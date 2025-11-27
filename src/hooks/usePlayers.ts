@@ -1,40 +1,52 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabaseClient';
 import { Database } from '../types/db';
+import { useTeamId } from './useTeamId';
 
 type Player = Database['public']['Tables']['players']['Row'];
 type PlayerInsert = Database['public']['Tables']['players']['Insert'];
 type PlayerUpdate = Database['public']['Tables']['players']['Update'];
 
 export function usePlayers() {
+    const teamId = useTeamId();
+
     return useQuery<Player[]>({
-        queryKey: ['players'],
+        queryKey: ['players', teamId],
         queryFn: async () => {
+            if (!teamId) throw new Error('No team membership found');
+
             const { data, error } = await supabase
                 .from('players')
                 .select('*')
+                .eq('team_id', teamId)
                 .order('full_name');
 
             if (error) throw error;
             return data as Player[];
         },
+        enabled: !!teamId,
     });
 }
 
 export function usePlayer(id: number) {
+    const teamId = useTeamId();
+
     return useQuery<Player>({
-        queryKey: ['players', id],
+        queryKey: ['players', id, teamId],
         queryFn: async () => {
+            if (!teamId) throw new Error('No team membership found');
+
             const { data, error } = await supabase
                 .from('players')
                 .select('*')
                 .eq('player_id', id)
+                .eq('team_id', teamId)
                 .single();
 
             if (error) throw error;
             return data as Player;
         },
-        enabled: !!id,
+        enabled: !!id && !!teamId,
     });
 }
 
@@ -82,10 +94,24 @@ export function useUpdatePlayer() {
 
     return useMutation({
         mutationFn: async ({ id, updates }: { id: number; updates: PlayerUpdate }) => {
+            // Verify player belongs to user's team
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) throw new Error('User not authenticated');
+
+            const { data: membership } = await supabase
+                .from('team_members')
+                .select('team_id')
+                .eq('user_id', user.id)
+                .eq('status', 'approved')
+                .single() as { data: { team_id: string } | null };
+
+            if (!membership) throw new Error('No approved team membership found');
+
             const { data, error } = await ((supabase as any)
                 .from('players')
                 .update(updates) as any)
                 .eq('player_id', id)
+                .eq('team_id', membership.team_id)
                 .select()
                 .single();
 
@@ -104,10 +130,24 @@ export function useDeletePlayer() {
 
     return useMutation({
         mutationFn: async (id: number) => {
+            // Verify player belongs to user's team
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) throw new Error('User not authenticated');
+
+            const { data: membership } = await supabase
+                .from('team_members')
+                .select('team_id')
+                .eq('user_id', user.id)
+                .eq('status', 'approved')
+                .single() as { data: { team_id: string } | null };
+
+            if (!membership) throw new Error('No approved team membership found');
+
             const { error } = await supabase
                 .from('players')
                 .delete()
-                .eq('player_id', id);
+                .eq('player_id', id)
+                .eq('team_id', membership.team_id);
 
             if (error) throw error;
         },
