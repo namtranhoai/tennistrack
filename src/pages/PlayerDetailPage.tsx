@@ -18,7 +18,7 @@ export default function PlayerDetailPage() {
     return (
         <div className="space-y-8">
             <div className="flex items-center space-x-4">
-                <Link to="/players">
+                <Link to="/dashboard/players">
                     <Button variant="ghost" size="icon">
                         <ArrowLeft className="h-4 w-4" />
                     </Button>
@@ -83,7 +83,7 @@ export default function PlayerDetailPage() {
                                 return (
                                     <Link
                                         key={match.match_id}
-                                        to={`/matches/${match.match_id}`}
+                                        to={`/dashboard/matches/${match.match_id}`}
                                         className="block group"
                                     >
                                         <div className="flex items-center justify-between border-b pb-3 last:border-0 last:pb-0 group-hover:bg-gray-50 p-2 rounded-md transition-colors">

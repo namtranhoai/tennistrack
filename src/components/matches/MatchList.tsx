@@ -109,7 +109,7 @@ export function MatchList({ matches, isLoading }: MatchListProps) {
                                     </TableCell>
                                     <TableCell>{match.score_line || '-'}</TableCell>
                                     <TableCell className="text-right">
-                                        <Link to={`/matches/${match.match_id}`}>
+                                        <Link to={`/dashboard/matches/${match.match_id}`}>
                                             <Button variant="ghost" size="sm">
                                                 View
                                             </Button>

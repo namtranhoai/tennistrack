@@ -63,7 +63,7 @@ export function ActivityFeed({ recentMatches }: ActivityFeedProps) {
                         return (
                             <Link
                                 key={match.match_id}
-                                to={`/matches/${match.match_id}`}
+                                to={`/dashboard/matches/${match.match_id}`}
                                 className="block group"
                             >
                                 <div className="flex items-start gap-3 p-3 rounded-lg border hover:bg-accent transition-colors">
@@ -135,7 +135,7 @@ export function ActivityFeed({ recentMatches }: ActivityFeedProps) {
                 {recentMatches.length > 10 && (
                     <div className="mt-4 pt-4 border-t text-center">
                         <Link
-                            to="/matches"
+                            to="/dashboard/matches"
                             className="text-sm text-primary hover:underline font-medium"
                         >
                             View all matches →

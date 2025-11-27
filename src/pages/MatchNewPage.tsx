@@ -94,7 +94,7 @@ export default function MatchNewPage() {
         createMatch.mutate({ match: matchData, players: matchPlayersData, sets: setsData }, {
             onSuccess: () => {
                 console.log('Match created successfully');
-                navigate('/matches');
+                navigate('/dashboard/matches');
             },
             onError: (error: any) => {
                 console.error('Failed to create match:', error);

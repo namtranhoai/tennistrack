@@ -104,7 +104,7 @@ export default function MatchesListPage() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <h2 className="text-3xl font-bold tracking-tight">Matches</h2>
-                <Link to="/matches/new">
+                <Link to="/dashboard/matches/new">
                     <Button>
                         <Plus className="mr-2 h-4 w-4" /> New Match
                     </Button>
