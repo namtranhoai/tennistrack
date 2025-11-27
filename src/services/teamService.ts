@@ -127,21 +127,27 @@ export async function getTeams(): Promise<Team[]> {
  * Get a user's approved team membership
  */
 export async function getUserTeamMembership(userId: string): Promise<TeamMember | null> {
-    const { data, error } = await supabase
+    console.log('[teamService] Getting team membership for user:', userId);
+    const { data, error } = await ((supabase as any)
         .from('team_members')
         .select('*')
         .eq('user_id', userId)
         .eq('status', 'approved')
-        .single();
+        .single());
 
     if (error) {
         if (error.code === 'PGRST116') {
             // No membership found
+            console.log('[teamService] No approved membership found');
             return null;
         }
+        console.error('[teamService] Error getting team membership:', error);
         throw error;
     }
 
+    if (data) {
+        console.log('[teamService] Team membership found:', data.status);
+    }
     return data;
 }
 
@@ -149,21 +155,25 @@ export async function getUserTeamMembership(userId: string): Promise<TeamMember 
  * Get a user's pending team membership
  */
 export async function getUserPendingMembership(userId: string): Promise<TeamMember | null> {
-    const { data, error } = await supabase
+    console.log('[teamService] Getting pending membership for user:', userId);
+    const { data, error } = await ((supabase as any)
         .from('team_members')
         .select('*')
         .eq('user_id', userId)
         .eq('status', 'pending')
-        .single();
+        .single());
 
     if (error) {
         if (error.code === 'PGRST116') {
             // No pending membership found
+            console.log('[teamService] No pending membership found');
             return null;
         }
+        console.error('[teamService] Error getting pending membership:', error);
         throw error;
     }
 
+    console.log('[teamService] Pending membership found');
     return data;
 }
 

@@ -15,7 +15,7 @@ export default function LoginPage() {
         if (!authLoading && user) {
             // If user has approved team membership, go to dashboard
             if (teamMembership?.status === 'approved') {
-                navigate('/', { replace: true });
+                navigate('/dashboard', { replace: true });
             } else {
                 // Otherwise go to choose team page
                 navigate('/choose-team', { replace: true });
@@ -29,11 +29,13 @@ export default function LoginPage() {
         setLoading(true);
 
         try {
+            console.log('[LoginPage] Attempting sign in...');
             await signIn(email, password);
-            // Navigation will be handled by ProtectedRoute logic
-            navigate('/');
+            console.log('[LoginPage] Sign in successful, auth state will handle navigation');
+            // Don't navigate here - let the useEffect handle it based on auth state
+            // This prevents race conditions with ProtectedRoute
         } catch (err: unknown) {
-            console.error('Login error:', err);
+            console.error('[LoginPage] Login error:', err);
             if (err instanceof Error) {
                 if (err.message.includes('Email not confirmed')) {
                     setError('Please verify your email address before logging in.');

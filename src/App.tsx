@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './contexts/AuthProvider';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import MainLayout from './components/layout/MainLayout';
+import HomePage from './pages/HomePage';
 import SignUpPage from './pages/SignUpPage';
 import LoginPage from './pages/LoginPage';
 import ChooseTeamPage from './pages/ChooseTeamPage';
@@ -23,13 +24,14 @@ function App() {
             <Router>
                 <Routes>
                     {/* Public routes */}
+                    <Route path="/" element={<HomePage />} />
                     <Route path="/signup" element={<SignUpPage />} />
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/choose-team" element={<ChooseTeamPage />} />
                     <Route path="/waiting-for-approval" element={<WaitingForApprovalPage />} />
 
                     {/* Protected routes */}
-                    <Route path="/" element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
+                    <Route path="/dashboard" element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
                         <Route index element={<DashboardPage />} />
                         <Route path="players" element={<PlayersListPage />} />
                         <Route path="players/:id" element={<PlayerDetailPage />} />

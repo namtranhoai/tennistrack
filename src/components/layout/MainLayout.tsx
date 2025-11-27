@@ -11,10 +11,10 @@ export default function MainLayout() {
     const { user, profile, teamMembership, signOut } = useAuth();
 
     const navigation = [
-        { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-        { name: 'Players', href: '/players', icon: Users },
-        { name: 'Matches', href: '/matches', icon: Trophy },
-        { name: 'Compare Players', href: '/compare', icon: GitCompare },
+        { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+        { name: 'Players', href: '/dashboard/players', icon: Users },
+        { name: 'Matches', href: '/dashboard/matches', icon: Trophy },
+        { name: 'Compare Players', href: '/dashboard/compare', icon: GitCompare },
     ];
 
     const handleSignOut = async () => {
@@ -42,7 +42,7 @@ export default function MainLayout() {
                 </div>
                 <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
                     {navigation.map((item) => {
-                        const isActive = location.pathname === item.href || (item.href !== '/' && location.pathname.startsWith(item.href));
+                        const isActive = location.pathname === item.href || (item.href !== '/dashboard' && location.pathname.startsWith(item.href));
                         return (
                             <Link
                                 key={item.name}
@@ -63,15 +63,15 @@ export default function MainLayout() {
                     {/* Team Admin Link (only for admins) */}
                     {teamMembership?.role === 'admin' && (
                         <Link
-                            to="/team/admin"
+                            to="/dashboard/team/admin"
                             className={cn(
                                 "flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors",
-                                location.pathname === '/team/admin'
+                                location.pathname === '/dashboard/team/admin'
                                     ? "bg-indigo-50 text-indigo-700"
                                     : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
                             )}
                         >
-                            <Settings className={cn("w-5 h-5 mr-3", location.pathname === '/team/admin' ? "text-indigo-700" : "text-gray-400")} />
+                            <Settings className={cn("w-5 h-5 mr-3", location.pathname === '/dashboard/team/admin' ? "text-indigo-700" : "text-gray-400")} />
                             Team Admin
                         </Link>
                     )}

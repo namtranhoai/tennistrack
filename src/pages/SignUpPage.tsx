@@ -17,7 +17,7 @@ export default function SignUpPage() {
         if (!authLoading && user) {
             // If user has approved team membership, go to dashboard
             if (teamMembership?.status === 'approved') {
-                navigate('/', { replace: true });
+                navigate('/dashboard', { replace: true });
             } else {
                 // Otherwise go to choose team page
                 navigate('/choose-team', { replace: true });

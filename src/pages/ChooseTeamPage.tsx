@@ -20,7 +20,7 @@ export default function ChooseTeamPage() {
     // Redirect to dashboard if user already has an approved team membership
     useEffect(() => {
         if (teamMembership && teamMembership.status === 'approved') {
-            navigate('/', { replace: true });
+            navigate('/dashboard', { replace: true });
         }
     }, [teamMembership, navigate]);
 
@@ -54,7 +54,7 @@ export default function ChooseTeamPage() {
         try {
             await teamService.createTeamAndSetAdmin(newTeamName, user.id);
             await refreshMembership();
-            navigate('/');
+            navigate('/dashboard');
         } catch (err: unknown) {
             if (err instanceof Error) {
                 if (err.message.includes('already have')) {
