@@ -91,7 +91,7 @@ export function HeadToHeadCard({
                             return (
                                 <Link
                                     key={match.matchId}
-                                    to={`/matches/${match.matchId}`}
+                                    to={`/dashboard/matches/${match.matchId}`}
                                     className="block group"
                                 >
                                     <div className="flex items-center justify-between p-3 rounded-lg border hover:bg-accent transition-colors">

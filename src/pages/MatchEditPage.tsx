@@ -30,7 +30,7 @@ export default function MatchEditPage() {
             { matchId, updates: data },
             {
                 onSuccess: () => {
-                    navigate(`/matches/${matchId}`);
+                    navigate(`/dashboard/matches/${matchId}`);
                 },
                 onError: (error) => {
                     console.error('Failed to update match:', error);
@@ -45,7 +45,7 @@ export default function MatchEditPage() {
     return (
         <div className="max-w-3xl mx-auto space-y-8 pb-12">
             <div className="flex items-center space-x-4">
-                <Button variant="ghost" size="icon" onClick={() => navigate(`/matches/${matchId}`)}>
+                <Button variant="ghost" size="icon" onClick={() => navigate(`/dashboard/matches/${matchId}`)}>
                     <ArrowLeft className="h-4 w-4" />
                 </Button>
                 <h2 className="text-3xl font-bold tracking-tight">Edit Match</h2>
@@ -115,7 +115,7 @@ export default function MatchEditPage() {
                     <Button
                         type="button"
                         variant="outline"
-                        onClick={() => navigate(`/matches/${matchId}`)}
+                        onClick={() => navigate(`/dashboard/matches/${matchId}`)}
                     >
                         Cancel
                     </Button>

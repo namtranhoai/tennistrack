@@ -53,7 +53,7 @@ export default function MatchNewPage() {
                 player_id: data.opponent1_id ? parseInt(data.opponent1_id) : null,
                 display_name: opponent1Details?.full_name || (data.opponent1_name?.trim() || 'Opponent 1'),
                 side: 'B',
-                role: 'opponent',
+                role: 'opponent_1',
                 is_tracked: false,
             });
         }
@@ -68,7 +68,7 @@ export default function MatchNewPage() {
                 player_id: data.opponent2_id ? parseInt(data.opponent2_id) : null,
                 display_name: opponent2Details?.full_name || (data.opponent2_name?.trim() || 'Opponent 2'),
                 side: 'B',
-                role: 'opponent',
+                role: 'opponent_2',
                 is_tracked: false,
             });
         }

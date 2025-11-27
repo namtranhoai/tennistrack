@@ -49,7 +49,7 @@ export function TopPlayersCard({ topPlayers }: TopPlayersCardProps) {
                     {topPlayers.map((player, index) => (
                         <Link
                             key={player.player_id}
-                            to={`/players/${player.player_id}`}
+                            to={`/dashboard/players/${player.player_id}`}
                             className="block group"
                         >
                             <div className="flex items-center gap-3 p-3 rounded-lg border hover:bg-accent transition-colors">

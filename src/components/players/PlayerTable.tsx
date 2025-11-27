@@ -70,7 +70,7 @@ export function PlayerTable({ players, isLoading, onEdit }: PlayerTableProps) {
                                     >
                                         Edit
                                     </Button>
-                                    <Link to={`/players/${player.player_id}`}>
+                                    <Link to={`/dashboard/players/${player.player_id}`}>
                                         <Button variant="ghost" size="sm">
                                             View
                                         </Button>

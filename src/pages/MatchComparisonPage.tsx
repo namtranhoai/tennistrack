@@ -19,13 +19,13 @@ export default function MatchComparisonPage() {
 
     // Group players for doubles
     const team1 = isDoubles ? comparison.players.filter(p => p.role === 'player' || p.role === 'partner') : [];
-    const team2 = isDoubles ? comparison.players.filter(p => p.role === 'opponent') : [];
+    const team2 = isDoubles ? comparison.players.filter(p => p.role.startsWith('opponent')) : [];
 
     return (
         <div className="space-y-8 pb-12">
             {/* Header */}
             <div className="flex items-center space-x-4">
-                <Link to={`/matches/${matchId}`}>
+                <Link to={`/dashboard/matches/${matchId}`}>
                     <Button variant="ghost" size="icon">
                         <ArrowLeft className="h-4 w-4" />
                     </Button>
@@ -132,7 +132,7 @@ export default function MatchComparisonPage() {
                                 player={player}
                                 isWinner={
                                     (player.role === 'player' && comparison.finalResult === 'win') ||
-                                    (player.role === 'opponent' && comparison.finalResult === 'loss')
+                                    (player.role.startsWith('opponent') && comparison.finalResult === 'loss')
                                 }
                             />
                         ))}

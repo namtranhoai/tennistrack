@@ -50,13 +50,12 @@ export function ActivityFeed({ recentMatches }: ActivityFeedProps) {
             <CardContent>
                 <div className="space-y-3">
                     {recentMatches.slice(0, 10).map((match, index) => {
-                        // Get opponents from match_players
-                        const opponents = match.match_players?.filter(
-                            mp => mp.side === 'B' || !mp.is_tracked
-                        ) || [];
-                        const opponentNames = opponents.map(opp =>
-                            opp.players?.full_name || opp.display_name
-                        ).join(' + ');
+                        // Get players for both sides
+                        const sideAPlayers = match.match_players?.filter(mp => mp.side === 'A') || [];
+                        const sideBPlayers = match.match_players?.filter(mp => mp.side === 'B') || [];
+
+                        const sideANames = sideAPlayers.map(p => p.players?.full_name || p.display_name).join(' & ');
+                        const sideBNames = sideBPlayers.map(p => p.players?.full_name || p.display_name).join(' & ');
 
                         const isWin = match.final_result === 'win';
 
@@ -84,9 +83,11 @@ export function ActivityFeed({ recentMatches }: ActivityFeedProps) {
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-start justify-between gap-2 mb-1">
                                             <div>
-                                                <p className="text-sm font-medium group-hover:text-primary transition-colors">
-                                                    Match vs {opponentNames || 'Unknown'}
-                                                </p>
+                                                <div className="text-sm font-medium group-hover:text-primary transition-colors">
+                                                    <span className={isWin ? 'font-bold' : ''}>{sideANames || 'Unknown'}</span>
+                                                    <span className="text-muted-foreground mx-1 font-normal">vs</span>
+                                                    <span className={!isWin ? 'font-bold' : ''}>{sideBNames || 'Unknown'}</span>
+                                                </div>
                                                 <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
                                                     <Calendar className="h-3 w-3" />
                                                     <span>

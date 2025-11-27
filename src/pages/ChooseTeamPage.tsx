@@ -14,15 +14,19 @@ export default function ChooseTeamPage() {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [loadingTeams, setLoadingTeams] = useState(false);
-    const { user, teamMembership, refreshMembership } = useAuth();
+    const { user, teamMembership, refreshMembership, loading: authLoading } = useAuth();
     const navigate = useNavigate();
 
-    // Redirect to dashboard if user already has an approved team membership
+    // Redirect logic based on membership status
     useEffect(() => {
-        if (teamMembership && teamMembership.status === 'approved') {
-            navigate('/dashboard', { replace: true });
+        if (!authLoading && teamMembership) {
+            if (teamMembership.status === 'approved') {
+                navigate('/dashboard', { replace: true });
+            } else if (teamMembership.status === 'pending') {
+                navigate('/waiting-for-approval', { replace: true });
+            }
         }
-    }, [teamMembership, navigate]);
+    }, [teamMembership, authLoading, navigate]);
 
     // Load teams when switching to join mode
     useEffect(() => {
@@ -90,6 +94,17 @@ export default function ChooseTeamPage() {
             setLoading(false);
         }
     };
+
+    if (authLoading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#132d24] to-[#1a3d32]">
+                <div className="text-center">
+                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-white mb-4"></div>
+                    <p className="text-white text-sm">Loading...</p>
+                </div>
+            </div>
+        );
+    }
 
     if (mode === 'select') {
         return (

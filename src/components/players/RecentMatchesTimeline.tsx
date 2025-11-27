@@ -48,7 +48,7 @@ export function RecentMatchesTimeline({ recentMatches }: RecentMatchesTimelinePr
                         return (
                             <Link
                                 key={match.match_id}
-                                to={`/matches/${match.match_id}`}
+                                to={`/dashboard/matches/${match.match_id}`}
                                 className="block group"
                             >
                                 <div className="flex items-start gap-3 p-3 rounded-lg border hover:bg-accent transition-colors">

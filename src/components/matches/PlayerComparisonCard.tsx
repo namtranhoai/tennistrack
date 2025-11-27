@@ -16,7 +16,8 @@ export default function PlayerComparisonCard({ player, isWinner }: PlayerCompari
                 return 'bg-indigo-100 text-indigo-800';
             case 'partner':
                 return 'bg-blue-100 text-blue-800';
-            case 'opponent':
+            case 'opponent_1':
+            case 'opponent_2':
                 return 'bg-gray-100 text-gray-800';
             default:
                 return 'bg-gray-100 text-gray-800';
@@ -29,8 +30,10 @@ export default function PlayerComparisonCard({ player, isWinner }: PlayerCompari
                 return 'You';
             case 'partner':
                 return 'Partner';
-            case 'opponent':
-                return 'Opponent';
+            case 'opponent_1':
+                return 'Opponent 1';
+            case 'opponent_2':
+                return 'Opponent 2';
             default:
                 return '';
         }

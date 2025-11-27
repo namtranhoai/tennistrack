@@ -38,7 +38,7 @@ export interface PlayerStats {
 
 export interface PlayerInfo {
     name: string;
-    role: 'player' | 'partner' | 'opponent';
+    role: 'player' | 'partner' | 'opponent_1' | 'opponent_2';
     stats?: PlayerStats;
 }
 

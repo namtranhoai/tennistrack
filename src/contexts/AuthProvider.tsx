@@ -19,19 +19,37 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const [teamMembership, setTeamMembership] = useState<TeamMember | null>(null);
     const [loading, setLoading] = useState(true);
 
+    // Helper to timeout a promise
+    const withTimeout = <T,>(promise: Promise<T>, ms: number, label: string): Promise<T> => {
+        return Promise.race([
+            promise,
+            new Promise<T>((_, reject) =>
+                setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms)
+            )
+        ]);
+    };
+
     // Load user profile and team membership
     const loadUserData = async (currentUser: User) => {
         console.log('[AuthProvider] Loading user data for:', currentUser.id);
         try {
             // Load profile with timeout
             console.log('[AuthProvider] Fetching profile...');
-            const userProfile = await authService.getProfile(currentUser.id);
+            const userProfile = await withTimeout(
+                authService.getProfile(currentUser.id),
+                5000,
+                'Profile fetch'
+            );
 
             // If no profile exists, create one from auth metadata
             if (!userProfile) {
                 console.log('[AuthProvider] No profile found, creating new profile...');
                 const fullName = currentUser.user_metadata?.full_name || currentUser.email || 'User';
-                const newProfile = await authService.createProfile(currentUser.id, fullName);
+                const newProfile = await withTimeout(
+                    authService.createProfile(currentUser.id, fullName),
+                    5000,
+                    'Profile creation'
+                );
                 setProfile(newProfile);
                 console.log('[AuthProvider] Profile created successfully');
             } else {
@@ -41,14 +59,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
             // Load team membership
             console.log('[AuthProvider] Fetching team membership...');
-            const membership = await teamService.getUserTeamMembership(currentUser.id);
+            const membership = await withTimeout(
+                teamService.getUserTeamMembership(currentUser.id),
+                5000,
+                'Team membership fetch'
+            );
             setTeamMembership(membership);
             console.log('[AuthProvider] Team membership loaded:', membership?.status || 'none');
         } catch (error) {
             console.error('[AuthProvider] Error loading user data:', error);
             // Set profile and membership to null on error to allow app to continue
-            setProfile(null);
-            setTeamMembership(null);
+            // We don't reset user here, as they are still authenticated
         }
     };
 
