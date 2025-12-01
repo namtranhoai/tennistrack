@@ -22,6 +22,9 @@ export default function MatchNewPage() {
             final_result: data.final_result,
             score_line: data.score_line,
             notes: data.notes ? data.notes.trim() : null,
+            status: data.status || 'scheduled',
+            started_at: data.started_at && data.started_at.trim() !== '' ? data.started_at : null,
+            completed_at: data.completed_at && data.completed_at.trim() !== '' ? data.completed_at : null,
         };
 
         // 2. Prepare Match Players Data

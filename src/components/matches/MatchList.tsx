@@ -10,6 +10,8 @@ import {
 } from '@/components/ui/table';
 import { MatchWithPlayer } from '@/types/extended';
 import { Users, User } from 'lucide-react';
+import { MatchStatusBadge } from './MatchStatusBadge';
+import { MatchTimer } from './MatchTimer';
 
 interface MatchListProps {
     matches: MatchWithPlayer[] | undefined;
@@ -32,6 +34,7 @@ export function MatchList({ matches, isLoading }: MatchListProps) {
             <Table>
                 <TableHeader>
                     <TableRow>
+                        <TableHead>Status</TableHead>
                         <TableHead>Date</TableHead>
                         <TableHead>Type</TableHead>
                         <TableHead>Player / Partner</TableHead>
@@ -39,19 +42,20 @@ export function MatchList({ matches, isLoading }: MatchListProps) {
                         <TableHead>Surface</TableHead>
                         <TableHead>Result</TableHead>
                         <TableHead>Score</TableHead>
+                        <TableHead>Duration</TableHead>
                         <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
                     {isLoading ? (
                         <TableRow>
-                            <TableCell colSpan={8} className="text-center h-24">
+                            <TableCell colSpan={10} className="text-center h-24">
                                 Loading...
                             </TableCell>
                         </TableRow>
                     ) : matches?.length === 0 ? (
                         <TableRow>
-                            <TableCell colSpan={8} className="text-center h-24">
+                            <TableCell colSpan={10} className="text-center h-24">
                                 No matches found.
                             </TableCell>
                         </TableRow>
@@ -62,7 +66,10 @@ export function MatchList({ matches, isLoading }: MatchListProps) {
                             const isDoubles = match.format === 'doubles' || trackedPlayers.length > 1;
 
                             return (
-                                <TableRow key={match.match_id}>
+                                <TableRow key={match.match_id} className={match.status === 'in_progress' ? 'bg-green-50' : ''}>
+                                    <TableCell>
+                                        <MatchStatusBadge status={match.status || 'scheduled'} />
+                                    </TableCell>
                                     <TableCell>
                                         {match.match_date ? new Date(match.match_date).toLocaleDateString() : '-'}
                                     </TableCell>
@@ -108,6 +115,13 @@ export function MatchList({ matches, isLoading }: MatchListProps) {
                                         </span>
                                     </TableCell>
                                     <TableCell>{match.score_line || '-'}</TableCell>
+                                    <TableCell>
+                                        <MatchTimer
+                                            startedAt={match.started_at}
+                                            completedAt={match.completed_at}
+                                            status={match.status || 'scheduled'}
+                                        />
+                                    </TableCell>
                                     <TableCell className="text-right">
                                         <Link to={`/dashboard/matches/${match.match_id}`}>
                                             <Button variant="ghost" size="sm">

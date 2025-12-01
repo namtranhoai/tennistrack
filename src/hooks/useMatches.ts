@@ -268,3 +268,116 @@ export function useDeleteMatch() {
         },
     });
 }
+
+// Hook to start a match
+export function useStartMatch() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (matchId: number) => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) throw new Error('User not authenticated');
+
+            const { data: membership } = await supabase
+                .from('team_members')
+                .select('team_id')
+                .eq('user_id', user.id)
+                .eq('status', 'approved')
+                .single() as { data: { team_id: string } | null };
+
+            if (!membership) throw new Error('No approved team membership found');
+
+            const { error } = await ((supabase
+                .from('matches') as any)
+                .update({
+                    status: 'in_progress',
+                    started_at: new Date().toISOString()
+                })
+                .eq('match_id', matchId)
+                .eq('team_id', membership.team_id));
+
+            if (error) throw error;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['matches'] });
+        },
+    });
+}
+
+// Hook to complete a match
+export function useCompleteMatch() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (matchId: number) => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) throw new Error('User not authenticated');
+
+            const { data: membership } = await supabase
+                .from('team_members')
+                .select('team_id')
+                .eq('user_id', user.id)
+                .eq('status', 'approved')
+                .single() as { data: { team_id: string } | null };
+
+            if (!membership) throw new Error('No approved team membership found');
+
+            const { error } = await ((supabase
+                .from('matches') as any)
+                .update({
+                    status: 'completed',
+                    completed_at: new Date().toISOString()
+                })
+                .eq('match_id', matchId)
+                .eq('team_id', membership.team_id));
+
+            if (error) throw error;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['matches'] });
+        },
+    });
+}
+
+// Hook to start a set
+export function useStartSet() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (setId: number) => {
+            const { error } = await ((supabase
+                .from('sets') as any)
+                .update({
+                    started_at: new Date().toISOString()
+                })
+                .eq('set_id', setId));
+
+            if (error) throw error;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['matches'] });
+        },
+    });
+}
+
+// Hook to complete a set
+export function useCompleteSet() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (setId: number) => {
+            const { error } = await ((supabase
+                .from('sets') as any)
+                .update({
+                    completed_at: new Date().toISOString()
+                })
+                .eq('set_id', setId));
+
+            if (error) throw error;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['matches'] });
+        },
+    });
+}
+

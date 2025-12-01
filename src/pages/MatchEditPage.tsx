@@ -12,7 +12,7 @@ export default function MatchEditPage() {
     const { data: match, isLoading } = useMatch(matchId);
     const updateMatch = useUpdateMatch();
 
-    const { register, handleSubmit } = useForm({
+    const { register, handleSubmit, watch } = useForm({
         values: match ? {
             match_date: match.match_date,
             location: match.location || '',
@@ -22,12 +22,24 @@ export default function MatchEditPage() {
             tournament_name: match.tournament_name || '',
             weather: match.weather || '',
             notes: match.notes || '',
+            status: match.status || 'scheduled',
+            started_at: match.started_at ? new Date(match.started_at).toISOString().slice(0, 16) : '',
+            completed_at: match.completed_at ? new Date(match.completed_at).toISOString().slice(0, 16) : '',
         } : undefined
     });
 
+    const matchStatus = watch('status');
+
     const onSubmit = (data: any) => {
+        // Convert empty strings to null for timestamp fields
+        const updates = {
+            ...data,
+            started_at: data.started_at && data.started_at.trim() !== '' ? data.started_at : null,
+            completed_at: data.completed_at && data.completed_at.trim() !== '' ? data.completed_at : null,
+        };
+
         updateMatch.mutate(
-            { matchId, updates: data },
+            { matchId, updates },
             {
                 onSuccess: () => {
                     navigate(`/dashboard/matches/${matchId}`);
@@ -107,6 +119,49 @@ export default function MatchEditPage() {
                                 className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                                 placeholder="Optional match notes"
                             />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Match Status & Timing */}
+                <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-6 space-y-6">
+                    <h3 className="font-semibold text-lg">Match Status & Timing</h3>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Match Status</label>
+                            <select
+                                {...register('status')}
+                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                            >
+                                <option value="scheduled">Scheduled (Not Started)</option>
+                                <option value="in_progress">In Progress</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Started At (Optional)</label>
+                            <Input
+                                type="datetime-local"
+                                {...register('started_at')}
+                                disabled={matchStatus === 'scheduled'}
+                            />
+                            <p className="text-xs text-muted-foreground">
+                                {matchStatus === 'scheduled' ? 'Auto-set when match starts' : 'When the match began'}
+                            </p>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Completed At (Optional)</label>
+                            <Input
+                                type="datetime-local"
+                                {...register('completed_at')}
+                                disabled={matchStatus !== 'completed'}
+                            />
+                            <p className="text-xs text-muted-foreground">
+                                {matchStatus !== 'completed' ? 'Only for completed matches' : 'When the match ended'}
+                            </p>
                         </div>
                     </div>
                 </div>

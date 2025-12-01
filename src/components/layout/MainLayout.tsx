@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, Trophy, Menu, X, GitCompare, LogOut, Settings } from 'lucide-react';
+import { LayoutDashboard, Users, Trophy, Menu, X, GitCompare, LogOut, Settings, Radio } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -14,6 +14,7 @@ export default function MainLayout() {
         { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
         { name: 'Players', href: '/dashboard/players', icon: Users },
         { name: 'Matches', href: '/dashboard/matches', icon: Trophy },
+        { name: 'Live Tracking', href: '/dashboard/live', icon: Radio },
         { name: 'Compare Players', href: '/dashboard/compare', icon: GitCompare },
     ];
 

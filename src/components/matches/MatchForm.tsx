@@ -29,6 +29,9 @@ export function MatchForm({ onSubmit, isSubmitting, initialData }: MatchFormProp
             surface: 'hard',
             final_result: 'win',
             score_line: '',
+            status: 'completed', // Default to completed for recording past matches
+            started_at: '',
+            completed_at: '',
             sets: [
                 { set_number: 1, games_won: 6, games_lost: 0, set_result: 'win' }
             ]
@@ -46,6 +49,7 @@ export function MatchForm({ onSubmit, isSubmitting, initialData }: MatchFormProp
     });
 
     const matchType = watch('match_type');
+    const matchStatus = watch('status');
 
     // Manage players based on match type
     useEffect(() => {
@@ -186,6 +190,52 @@ export function MatchForm({ onSubmit, isSubmitting, initialData }: MatchFormProp
                     <div className="space-y-2 md:col-span-2">
                         <label className="text-sm font-medium">Score Line</label>
                         <Input {...register('score_line')} placeholder="e.g. 6-4 3-6 7-5" />
+                    </div>
+                </div>
+            </div>
+
+            {/* Match Status & Timing */}
+            <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-6 space-y-6">
+                <h3 className="font-semibold text-lg">Match Status & Timing</h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium">Match Status</label>
+                        <select
+                            {...register('status')}
+                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                        >
+                            <option value="scheduled">Scheduled (Not Started)</option>
+                            <option value="in_progress">In Progress</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                        <p className="text-xs text-muted-foreground">
+                            Select "Completed" for recording past matches
+                        </p>
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium">Started At (Optional)</label>
+                        <Input
+                            type="datetime-local"
+                            {...register('started_at')}
+                            disabled={matchStatus === 'scheduled'}
+                        />
+                        <p className="text-xs text-muted-foreground">
+                            {matchStatus === 'scheduled' ? 'Auto-set when match starts' : 'When the match began'}
+                        </p>
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium">Completed At (Optional)</label>
+                        <Input
+                            type="datetime-local"
+                            {...register('completed_at')}
+                            disabled={matchStatus !== 'completed'}
+                        />
+                        <p className="text-xs text-muted-foreground">
+                            {matchStatus !== 'completed' ? 'Only for completed matches' : 'When the match ended'}
+                        </p>
                     </div>
                 </div>
             </div>

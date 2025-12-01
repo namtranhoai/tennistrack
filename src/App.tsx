@@ -17,6 +17,8 @@ import MatchEditPage from './pages/MatchEditPage';
 import MatchDetailPage from './pages/MatchDetailPage';
 import MatchComparisonPage from './pages/MatchComparisonPage';
 import PlayerComparisonPage from './pages/PlayerComparisonPage';
+import LiveMatchesPage from './pages/LiveMatchesPage';
+import LiveMatchControlPage from './pages/LiveMatchControlPage';
 
 function App() {
     return (
@@ -41,6 +43,8 @@ function App() {
                         <Route path="matches/:id/edit" element={<MatchEditPage />} />
                         <Route path="matches/:id" element={<MatchDetailPage />} />
                         <Route path="matches/:id/compare" element={<MatchComparisonPage />} />
+                        <Route path="live" element={<LiveMatchesPage />} />
+                        <Route path="live/:matchId" element={<LiveMatchControlPage />} />
                         <Route path="team/admin" element={<TeamAdminPage />} />
                     </Route>
 

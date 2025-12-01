@@ -128,6 +128,9 @@ export interface Database {
                     notes: string | null
                     format: 'singles' | 'doubles'
                     team_id: string | null
+                    status: 'scheduled' | 'in_progress' | 'completed'
+                    started_at: string | null
+                    completed_at: string | null
                 }
                 Insert: {
                     match_id?: number
@@ -143,6 +146,9 @@ export interface Database {
                     notes?: string | null
                     format?: 'singles' | 'doubles'
                     team_id?: string | null
+                    status?: 'scheduled' | 'in_progress' | 'completed'
+                    started_at?: string | null
+                    completed_at?: string | null
                 }
                 Update: {
                     match_id?: number
@@ -158,6 +164,9 @@ export interface Database {
                     notes?: string | null
                     format?: 'singles' | 'doubles'
                     team_id?: string | null
+                    status?: 'scheduled' | 'in_progress' | 'completed'
+                    started_at?: string | null
+                    completed_at?: string | null
                 }
             }
             sets: {
@@ -170,6 +179,8 @@ export interface Database {
                     notes: string | null
                     games_side_a: number | null
                     games_side_b: number | null
+                    started_at: string | null
+                    completed_at: string | null
                 }
                 Insert: {
                     set_id?: number
@@ -180,6 +191,8 @@ export interface Database {
                     notes?: string | null
                     games_side_a?: number | null
                     games_side_b?: number | null
+                    started_at?: string | null
+                    completed_at?: string | null
                 }
                 Update: {
                     set_id?: number
@@ -190,6 +203,8 @@ export interface Database {
                     notes?: string | null
                     games_side_a?: number | null
                     games_side_b?: number | null
+                    started_at?: string | null
+                    completed_at?: string | null
                 }
             }
             match_players: {
