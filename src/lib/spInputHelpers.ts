@@ -11,12 +11,6 @@ export function deriveStatsFromKPIs(kpis: QuickKPIs): Partial<DetailedStats> {
 
     // Serve quality mapping (rough estimates)
     if (kpis.serveQuality) {
-        const serveMap = {
-            poor: { firstServePercent: 0.45, aceRate: 0.02 },
-            fair: { firstServePercent: 0.55, aceRate: 0.05 },
-            good: { firstServePercent: 0.65, aceRate: 0.08 },
-            excellent: { firstServePercent: 0.75, aceRate: 0.12 },
-        };
         // These are just placeholders - actual values come from events
         derived.first_serve_in = 0;
         derived.first_serve_total = 0;
@@ -24,12 +18,6 @@ export function deriveStatsFromKPIs(kpis: QuickKPIs): Partial<DetailedStats> {
 
     // Return quality mapping
     if (kpis.returnQuality) {
-        const returnMap = {
-            poor: { returnInPercent: 0.50, deepPercent: 0.20 },
-            fair: { returnInPercent: 0.65, deepPercent: 0.35 },
-            good: { returnInPercent: 0.75, deepPercent: 0.50 },
-            excellent: { returnInPercent: 0.85, deepPercent: 0.65 },
-        };
         derived.returns_in = 0;
         derived.returns_total = 0;
         derived.deep_returns = 0;

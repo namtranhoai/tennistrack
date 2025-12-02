@@ -1,29 +1,30 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../lib/supabaseClient';
-import { MatchWithDetails } from '../../types/live';
+import { LiveMatchDetails, MatchPlayer } from '../../types/live';
+import { Database } from '../../types/db';
 
 interface MatchInfoTabProps {
-    match: MatchWithDetails;
+    match: LiveMatchDetails;
 }
 
 export default function MatchInfoTab({ match }: MatchInfoTabProps) {
     const queryClient = useQueryClient();
-    const [status, setStatus] = useState(match.status);
+    const [status, setStatus] = useState<'scheduled' | 'in_progress' | 'completed'>(match.status);
     const [notes, setNotes] = useState(match.notes || '');
     const [isEditing, setIsEditing] = useState(false);
 
-    const sideAPlayers = match.match_players.filter(p => p.side === 'A');
-    const sideBPlayers = match.match_players.filter(p => p.side === 'B');
+    const sideAPlayers = match.match_players.filter((p: MatchPlayer) => p.side === 'A');
+    const sideBPlayers = match.match_players.filter((p: MatchPlayer) => p.side === 'B');
 
     const formatPlayerNames = (players: typeof match.match_players) => {
-        return players.map(p => p.display_name).join(' / ');
+        return players.map((p: MatchPlayer) => p.display_name).join(' / ');
     };
 
     const getMatchScore = () => {
         if (!match.sets || match.sets.length === 0) return 'No sets played';
 
-        return match.sets.map(set => {
+        return match.sets.map((set: Database['public']['Tables']['sets']['Row']) => {
             const sideAGames = set.games_side_a || 0;
             const sideBGames = set.games_side_b || 0;
             return `${sideAGames}-${sideBGames}`;
@@ -32,7 +33,7 @@ export default function MatchInfoTab({ match }: MatchInfoTabProps) {
 
     // Update match status
     const updateStatusMutation = useMutation({
-        mutationFn: async (newStatus: string) => {
+        mutationFn: async (newStatus: 'scheduled' | 'in_progress' | 'completed') => {
             const updates: any = { status: newStatus };
 
             if (newStatus === 'in_progress' && !match.started_at) {
@@ -41,10 +42,13 @@ export default function MatchInfoTab({ match }: MatchInfoTabProps) {
                 updates.completed_at = new Date().toISOString();
             }
 
-            const { error } = await supabase
+            const query = supabase
                 .from('matches')
+                // @ts-ignore - Supabase type inference issue with dynamic updates
                 .update(updates)
                 .eq('match_id', match.match_id);
+
+            const { error } = await query;
 
             if (error) throw error;
         },
@@ -56,10 +60,13 @@ export default function MatchInfoTab({ match }: MatchInfoTabProps) {
     // Update match notes
     const updateNotesMutation = useMutation({
         mutationFn: async (newNotes: string) => {
-            const { error } = await supabase
+            const query = supabase
                 .from('matches')
+                // @ts-ignore - Supabase type inference issue with update
                 .update({ notes: newNotes })
                 .eq('match_id', match.match_id);
+
+            const { error } = await query;
 
             if (error) throw error;
         },
@@ -69,7 +76,7 @@ export default function MatchInfoTab({ match }: MatchInfoTabProps) {
         },
     });
 
-    const handleStatusChange = (newStatus: string) => {
+    const handleStatusChange = (newStatus: 'scheduled' | 'in_progress' | 'completed') => {
         setStatus(newStatus);
         updateStatusMutation.mutate(newStatus);
     };
@@ -117,7 +124,7 @@ export default function MatchInfoTab({ match }: MatchInfoTabProps) {
                         <div className="text-xs text-gray-600 mb-1">Status</div>
                         <select
                             value={status}
-                            onChange={(e) => handleStatusChange(e.target.value)}
+                            onChange={(e) => handleStatusChange(e.target.value as 'scheduled' | 'in_progress' | 'completed')}
                             disabled={updateStatusMutation.isPending}
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm sm:text-base touch-manipulation disabled:opacity-50"
                         >

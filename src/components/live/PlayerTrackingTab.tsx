@@ -1,9 +1,9 @@
-import { MatchWithDetails } from '../../types/live';
+import { LiveMatchDetails, MatchPlayer, SetWithStatus } from '../../types/live';
 import PlayerSelector from './PlayerSelector';
 import SPInputPanel from './SPInputPanel';
 
 interface PlayerTrackingTabProps {
-    match: MatchWithDetails;
+    match: LiveMatchDetails;
     selectedSetId: number | null;
     selectedPlayerId: number | null;
     onSelectPlayer: (playerId: number) => void;
@@ -16,10 +16,10 @@ export default function PlayerTrackingTab({
     onSelectPlayer
 }: PlayerTrackingTabProps) {
     // Find selected player info
-    const selectedPlayer = match.match_players.find(p => p.match_player_id === selectedPlayerId);
+    const selectedPlayer = match.match_players.find((p: MatchPlayer) => p.match_player_id === selectedPlayerId);
 
     // Find selected set info
-    const selectedSet = match.sets?.find(s => s.set_id === selectedSetId);
+    const selectedSet = match.sets?.find((s: SetWithStatus) => s.set_id === selectedSetId);
     const setNumber = selectedSet ? match.sets?.indexOf(selectedSet)! + 1 : undefined;
 
     return (
@@ -58,7 +58,7 @@ export default function PlayerTrackingTab({
                             setId={selectedSetId}
                             matchPlayerId={selectedPlayerId}
                             playerName={selectedPlayer?.display_name}
-                            playerAvatar={selectedPlayer?.avatar_url}
+                            playerAvatar={selectedPlayer?.players?.avatar_url ?? undefined}
                             setNumber={setNumber}
                         />
                     )}

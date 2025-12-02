@@ -20,9 +20,9 @@ export function useCreateSet() {
     return useMutation({
         mutationFn: async ({ matchId, gamesA = 0, gamesB = 0 }: CreateSetParams) => {
             // Get the highest set_number for this match
-            const { data: existingSets, error: fetchError } = await supabase
+            const { data: existingSets, error: fetchError } = await (supabase
                 .from('sets')
-                .select('set_number')
+                .select('set_number') as any)
                 .eq('match_id', matchId)
                 .order('set_number', { ascending: false })
                 .limit(1);
@@ -30,7 +30,7 @@ export function useCreateSet() {
             if (fetchError) throw fetchError;
 
             const nextSetNumber = existingSets && existingSets.length > 0
-                ? existingSets[0].set_number + 1
+                ? (existingSets[0] as any).set_number + 1
                 : 1;
 
             // Create the new set
@@ -52,7 +52,7 @@ export function useCreateSet() {
             if (error) throw error;
             return data;
         },
-        onSuccess: (data, variables) => {
+        onSuccess: (_data, variables) => {
             // Invalidate live match query to refresh sets list
             queryClient.invalidateQueries({ queryKey: ['liveMatch', variables.matchId] });
             queryClient.invalidateQueries({ queryKey: ['matches'] });

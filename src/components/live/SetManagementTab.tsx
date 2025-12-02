@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../lib/supabaseClient';
-import { MatchWithDetails } from '../../types/live';
+import { LiveMatchDetails, SetWithStatus } from '../../types/live';
 import SetSelector from './SetSelector';
 
 interface SetManagementTabProps {
-    match: MatchWithDetails;
+    match: LiveMatchDetails;
     selectedSetId: number | null;
     onSelectSet: (setId: number) => void;
 }
@@ -13,7 +13,7 @@ interface SetManagementTabProps {
 export default function SetManagementTab({ match, selectedSetId, onSelectSet }: SetManagementTabProps) {
     const queryClient = useQueryClient();
     const sets = match.sets || [];
-    const selectedSet = sets.find(s => s.set_id === selectedSetId);
+    const selectedSet = sets.find((s: SetWithStatus) => s.set_id === selectedSetId);
 
     const [gamesA, setGamesA] = useState(selectedSet?.games_side_a || 0);
     const [gamesB, setGamesB] = useState(selectedSet?.games_side_b || 0);
@@ -25,13 +25,16 @@ export default function SetManagementTab({ match, selectedSetId, onSelectSet }: 
         mutationFn: async ({ sideAGames, sideBGames }: { sideAGames: number; sideBGames: number }) => {
             if (!selectedSetId) return;
 
-            const { error } = await supabase
+            const query = supabase
                 .from('sets')
+                // @ts-ignore - Supabase type inference issue with update
                 .update({
                     games_side_a: sideAGames,
                     games_side_b: sideBGames,
                 })
                 .eq('set_id', selectedSetId);
+
+            const { error } = await query;
 
             if (error) throw error;
         },
@@ -45,8 +48,9 @@ export default function SetManagementTab({ match, selectedSetId, onSelectSet }: 
         mutationFn: async () => {
             if (!selectedSetId) return;
 
-            const { error } = await supabase
+            const query = supabase
                 .from('sets')
+                // @ts-ignore - Supabase type inference issue with update
                 .update({
                     completed_at: new Date().toISOString(),
                     games_side_a: gamesA,
@@ -55,6 +59,8 @@ export default function SetManagementTab({ match, selectedSetId, onSelectSet }: 
                     tiebreak_score: tiebreakPlayed ? tiebreakScore : null,
                 })
                 .eq('set_id', selectedSetId);
+
+            const { error } = await query;
 
             if (error) throw error;
         },
@@ -68,12 +74,15 @@ export default function SetManagementTab({ match, selectedSetId, onSelectSet }: 
         mutationFn: async () => {
             if (!selectedSetId) return;
 
-            const { error } = await supabase
+            const query = supabase
                 .from('sets')
+                // @ts-ignore - Supabase type inference issue with update
                 .update({
                     started_at: new Date().toISOString(),
                 })
                 .eq('set_id', selectedSetId);
+
+            const { error } = await query;
 
             if (error) throw error;
         },
@@ -147,8 +156,8 @@ export default function SetManagementTab({ match, selectedSetId, onSelectSet }: 
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                         <h3 className="text-base sm:text-lg font-semibold text-gray-900">Quick Update</h3>
                         <span className={`px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${isCompleted ? 'bg-blue-100 text-blue-700' :
-                                isInProgress ? 'bg-green-100 text-green-700' :
-                                    'bg-gray-100 text-gray-700'
+                            isInProgress ? 'bg-green-100 text-green-700' :
+                                'bg-gray-100 text-gray-700'
                             }`}>
                             {isCompleted ? 'Completed' : isInProgress ? 'In Progress' : 'Not Started'}
                         </span>
