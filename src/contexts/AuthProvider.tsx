@@ -5,9 +5,9 @@ import { AuthContext, AuthContextType } from './AuthContext';
 import type { Database } from '../types/db';
 import * as authService from '../services/authService';
 import * as teamService from '../services/teamService';
+import type { TeamMemberWithTeam } from '../services/teamService';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
-type TeamMember = Database['public']['Tables']['team_members']['Row'];
 
 interface AuthProviderProps {
     children: ReactNode;
@@ -16,7 +16,7 @@ interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps) {
     const [user, setUser] = useState<User | null>(null);
     const [profile, setProfile] = useState<Profile | null>(null);
-    const [teamMembership, setTeamMembership] = useState<TeamMember | null>(null);
+    const [teamMembership, setTeamMembership] = useState<TeamMemberWithTeam | null>(null);
     const [loading, setLoading] = useState(true);
 
     // Helper to timeout a promise

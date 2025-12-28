@@ -83,7 +83,7 @@ export default function MainLayout() {
                     <div className="mb-3">
                         <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Team</p>
                         <p className="text-sm font-semibold text-gray-900 truncate">
-                            {teamMembership ? 'Loading...' : 'No Team'}
+                            {teamMembership?.teams?.name || 'No Team'}
                         </p>
                     </div>
                     <div className="mb-3">

@@ -56,6 +56,7 @@ export interface Database {
                     user_id: string
                     role: 'admin' | 'member'
                     status: 'pending' | 'approved' | 'rejected'
+                    is_active: boolean
                     created_at: string
                 }
                 Insert: {
@@ -64,6 +65,7 @@ export interface Database {
                     user_id: string
                     role: 'admin' | 'member'
                     status: 'pending' | 'approved' | 'rejected'
+                    is_active?: boolean
                     created_at?: string
                 }
                 Update: {
@@ -72,6 +74,7 @@ export interface Database {
                     user_id?: string
                     role?: 'admin' | 'member'
                     status?: 'pending' | 'approved' | 'rejected'
+                    is_active?: boolean
                     created_at?: string
                 }
             }

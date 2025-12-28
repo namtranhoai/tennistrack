@@ -27,7 +27,18 @@ export function PlayerForm({ onSubmit, onCancel, isSubmitting, initialData }: Pl
     });
 
     const handleFormSubmit = (data: any) => {
-        onSubmit({ ...data, avatar_url: avatarUrl });
+        // Convert empty strings to null for optional fields
+        const cleanedData = {
+            ...data,
+            avatar_url: avatarUrl,
+            birth_date: data.birth_date || null,
+            gender: data.gender || null,
+            dominant_hand: data.dominant_hand || null,
+            backhand_type: data.backhand_type || null,
+            level: data.level || null,
+            notes: data.notes || null,
+        };
+        onSubmit(cleanedData);
     };
 
     return (

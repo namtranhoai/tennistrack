@@ -123,14 +123,25 @@ export async function getTeams(): Promise<Team[]> {
     return data || [];
 }
 
+export interface TeamMemberWithTeam extends TeamMember {
+    teams: {
+        name: string;
+    } | null;
+}
+
 /**
  * Get a user's approved team membership
  */
-export async function getUserTeamMembership(userId: string): Promise<TeamMember | null> {
+export async function getUserTeamMembership(userId: string): Promise<TeamMemberWithTeam | null> {
     console.log('[teamService] Getting team membership for user:', userId);
     const { data, error } = await ((supabase as any)
         .from('team_members')
-        .select('*')
+        .select(`
+            *,
+            teams (
+                name
+            )
+        `)
         .eq('user_id', userId)
         .eq('status', 'approved')
         .single());
@@ -146,7 +157,7 @@ export async function getUserTeamMembership(userId: string): Promise<TeamMember 
     }
 
     if (data) {
-        console.log('[teamService] Team membership found:', data.status);
+        console.log('[teamService] Team membership found:', data.status, 'Team:', data.teams?.name);
     }
     return data;
 }
@@ -322,4 +333,73 @@ export async function cancelMembershipRequest(membershipId: string): Promise<voi
     if (error) {
         throw error;
     }
+}
+
+/**
+ * Get all team members (approved only)
+ */
+export async function getTeamMembers(teamId: string): Promise<TeamMemberWithProfile[]> {
+    const { data, error } = await supabase
+        .from('team_members')
+        .select(`
+            *,
+            profiles (
+                full_name
+            )
+        `)
+        .eq('team_id', teamId)
+        .eq('status', 'approved')
+        .order('created_at', { ascending: true });
+
+    if (error) {
+        throw error;
+    }
+
+    return data as TeamMemberWithProfile[] || [];
+}
+
+/**
+ * Deactivate a team member
+ */
+export async function deactivateMember(membershipId: string): Promise<TeamMember> {
+    console.log('[teamService] Deactivating member with ID:', membershipId);
+
+    const { data, error } = await ((supabase as any)
+        .from('team_members')
+        .update({ is_active: false })
+        .eq('id', membershipId)
+        .eq('status', 'approved') // Only deactivate approved members
+        .select()
+        .single());
+
+    if (error) {
+        console.error('[teamService] Error deactivating member:', error);
+        throw error;
+    }
+
+    console.log('[teamService] Member deactivated successfully:', data);
+    return data;
+}
+
+/**
+ * Activate a team member
+ */
+export async function activateMember(membershipId: string): Promise<TeamMember> {
+    console.log('[teamService] Activating member with ID:', membershipId);
+
+    const { data, error } = await ((supabase as any)
+        .from('team_members')
+        .update({ is_active: true })
+        .eq('id', membershipId)
+        .eq('status', 'approved') // Only activate approved members
+        .select()
+        .single());
+
+    if (error) {
+        console.error('[teamService] Error activating member:', error);
+        throw error;
+    }
+
+    console.log('[teamService] Member activated successfully:', data);
+    return data;
 }
